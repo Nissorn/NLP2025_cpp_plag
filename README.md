@@ -470,3 +470,67 @@ Similarity=cos(θ)=∥A∥∥B∥ / A⋅B
 - **AUC:** 98.92%
 
 ค่า F1-Score ที่สูงถึง 94% บน Test Set ยืนยันว่าระบบมีประสิทธิภาพสูงในการตรวจจับการลอกเลียนแบบโค้ด C++
+
+
+# C++ Plagiarism Detection with Siamese CodeBERT & Tree-sitter
+
+This project implements a robust source code plagiarism detection system for C++ using a **Siamese Network architecture** backed by **CodeBERT**. It combines semantic analysis (embeddings) with structural analysis (Abstract Syntax Tree via **Tree-sitter**) to accurately detect code clones.
+
+The model achieves an **F1-Score of 94.03%** on the POJ-104 dataset, significantly outperforming traditional regex-based approaches.
+
+## 🚀 Key Features
+* **Semantic Detection:** Uses a fine-tuned Siamese CodeBERT model to capture the semantic meaning of code logic.
+* **Structural Analysis:** Leverages **Tree-sitter** for precise Abstract Syntax Tree (AST) extraction, overcoming the limitations of regex-based parsing.
+* **Siamese Architecture:** Implements a shared-weight encoder with Mean Pooling to generate comparable embedding vectors.
+* **Robust Preprocessing:** Includes code normalization (comment removal, whitespace reduction, keyword standardization).
+
+## 📊 Performance
+Evaluation on the held-out Test Set (1,500 pairs):
+
+| Metric | Score |
+| :--- | :--- |
+| **Accuracy** | **93.93%** |
+| **F1-Score** | **94.03%** |
+| **Precision** | 92.52% |
+| **Recall** | 95.60% |
+| **AUC** | 98.92% |
+
+## 🛠️ Methodology
+
+### 1. Data Preparation (POJ-104)
+We utilized the **POJ-104** dataset from Google's CodeXGLUE benchmark.
+* **Pairing Strategy:** Generated **10,000 pairs** balanced 50/50 between Clones (same problem) and Non-clones (different problems).
+* **Splitting:** Train (70%), Validation (15%), Test (15%).
+
+### 2. Preprocessing & Feature Engineering
+* **Normalization:** Code is normalized to remove noise (comments, formatting) while preserving logic.
+* **AST Extraction:** We compared Regex-based AST vs. Tree-sitter. **Tree-sitter** was selected for its superior precision in handling complex nested structures and improved F1-scores during preliminary tests (reducing False Negatives from 139 to 85).
+
+### 3. Model Architecture
+* **Base Model:** `microsoft/codebert-base` (Pre-trained on 6 languages).
+* **Architecture:** Siamese Network with a Shared Encoder.
+* **Pooling:** Mean Pooling of the last hidden states (weighted by attention masks).
+* **Similarity:** Trained using a classification head on absolute vector differences; Inference uses **Cosine Similarity**.
+
+## 💻 Tech Stack
+* **Languages:** Python, C++
+* **Deep Learning:** PyTorch, Transformers (Hugging Face)
+* **Parsing:** Tree-sitter
+* **Data Handling:** Pandas, NumPy, Scikit-learn
+* **Visualization:** Matplotlib, Seaborn
+
+## 📈 Results: Regex vs. Tree-sitter
+We validated the necessity of a proper parser. Tree-sitter proved to be significantly more reliable than Regex pattern matching for structural features:
+
+| Metric | Regex AST | Tree-sitter AST |
+| :--- | :--- | :--- |
+| **F1-Score** | 0.734 | **0.763** |
+| **Recall** | 0.893 | **0.825** |
+| **Accuracy** | 0.657 | **0.728** |
+
+## ⚙️ How to Run
+*(Optional: Add your installation steps here, e.g.)*
+1. Install dependencies: `pip install torch transformers datasets tree-sitter`
+2. Prepare dataset: `python preprocess.py`
+3. Train model: `python train.py`
+4. Evaluate: `python evaluate.py`
